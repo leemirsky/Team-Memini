@@ -5,8 +5,8 @@
 #include <AddicoreRFID.h>
 #include <SPI.h>
 
-#define	uchar	unsigned char
-#define	uint	unsigned int
+#define  uchar unsigned char
+#define uint  unsigned int
 
 uchar fifobytes;
 uchar fifoValue;
@@ -38,18 +38,18 @@ void setup() {
 
 void loop()
 {
-  	uchar i, tmp, checksum1;
-	uchar status;
+    uchar i, tmp, checksum1;
+  uchar status;
         uchar str[MAX_LEN];
         uchar RC_size;
-        uchar blockAddr;	//Selection operation block address 0 to 63
+        uchar blockAddr;  //Selection operation block address 0 to 63
         String mynum = "";
 
         str[1] = 0x4400;
-	//Find tags, return tag type
-	status = myRFID.AddicoreRFID_Request(PICC_REQIDL, str);	
-	if (status == MI_OK)
-	{
+  //Find tags, return tag type
+  status = myRFID.AddicoreRFID_Request(PICC_REQIDL, str); 
+  if (status == MI_OK)
+  { 
           Serial.println("RFID tag detected");
           Serial.print("Tag Type:\t\t");
           uint tagType = str[0] << 8;
@@ -74,38 +74,42 @@ void loop()
               Serial.println("Unknown");
               break;
           }
-	}
+  }
 
-	//Anti-collision, return tag serial number 4 bytes
-	status = myRFID.AddicoreRFID_Anticoll(str);
-	if (status == MI_OK)
-	{
+  //Anti-collision, return tag serial number 4 bytes
+  status = myRFID.AddicoreRFID_Anticoll(str);
+  if (status == MI_OK)
+  {
           checksum1 = str[0] ^ str[1] ^ str[2] ^ str[3];
           Serial.print("The tag's number is:\t");
-    	    Serial.print(str[0]);
+          Serial.print(str[0]);
             Serial.print(" , ");
-    	    Serial.print(str[1]);
+          Serial.print(str[1]);
             Serial.print(" , ");
-    	    Serial.print(str[2]);
+          Serial.print(str[2]);
             Serial.print(" , ");
-    	    Serial.println(str[3]);
+          Serial.println(str[3]);
 
           Serial.print("Read Checksum:\t\t");
-    	      Serial.println(str[4]);
+            Serial.println(str[4]);
           Serial.print("Calculated Checksum:\t");
             Serial.println(checksum1);
             
             // Should really check all pairs, but for now we'll just use the first
-            if(str[0] == 197)                      //You can change this to the first byte of your tag by finding the card's ID through the Serial Monitor
+            if(str[0] == 3)                      //You can change this to the first byte of your tag by finding the card's ID through the Serial Monitor
             {
+                Serial.println("Momo's in your bag!");
+            } else if(str[0] == 50) {             //You can change this to the first byte of your tag by finding the card's ID through the Serial Monitor
                 Serial.println("You added an item to your bag!");
-            } else if(str[0] == 131) {             //You can change this to the first byte of your tag by finding the card's ID through the Serial Monitor
-                Serial.println("You added an item to your bag!");
+            } else if(str[0] == 131){
+                Serial.println("More items were placed in your bag!");
+            } else if(str[0] == 115){
+                Serial.println("Good!");  
             }
             Serial.println();
             delay(1000);
-	}
-		
-        myRFID.AddicoreRFID_Halt();		   //Command tag into hibernation              
+  }
+    
+        myRFID.AddicoreRFID_Halt();      //Command tag into hibernation              
 
 }
