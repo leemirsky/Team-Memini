@@ -4,13 +4,14 @@
 
 #include <AddicoreRFID.h>
 #include <SPI.h>
+#include <SoftwareSerial.h>
 
 #define  uchar unsigned char
 #define uint  unsigned int
 
 uchar fifobytes;
 uchar fifoValue;
-char inputByte;
+
 
 AddicoreRFID myRFID; // create AddicoreRFID object to control the RFID module
 
@@ -24,9 +25,18 @@ const int NRSTPD = 5;
 //Maximum length of the array
 #define MAX_LEN 16
 
+SoftwareSerial ble_device(3,4);
+
+String str_ii = "";
+int ii_0 = 0;
+
+
 void setup() {                
-   Serial.begin(9600);                        // RFID reader SOUT pin connected to Serial RX pin at 9600bps 
- 
+   Serial.begin(115200);
+   delay(1000);
+   ble_device.begin(9600);                        // RFID reader SOUT pin connected to Serial RX pin at 9600bps 
+   delay(1000);
+   
   // start the SPI library:
   SPI.begin();
   
@@ -35,9 +45,10 @@ void setup() {
   pinMode(NRSTPD,OUTPUT);                     // Set digital pin 10 , Not Reset and Power-down
     digitalWrite(NRSTPD, HIGH);
 
-   pinMode(13, OUTPUT);
 
-  myRFID.AddicoreRFID_Init();  
+  myRFID.AddicoreRFID_Init(); 
+
+  ble_help();
 }
 
 void loop()
@@ -114,18 +125,30 @@ void loop()
             delay(1000);
   }
     
-        myRFID.AddicoreRFID_Halt();      //Command tag into hibernation 
-
-
-     while(Serial.available()>0){
-       inputByte = Serial.read();
-       Serial.println(inputByte);
-       if(inputByte == 'Z'){
-          digitalWrite(13, HIGH);
-        }
-        else if (inputByte == 'z'){
-           digitalWrite(13, LOW);
-          }
-      }         
+        myRFID.AddicoreRFID_Halt();      //Command tag into hibernation          
 
 }
+
+
+void ble_help(){
+  ble_device.println("AT+HELP");
+  while(true){
+    char in_char = ble_device.read();
+    if(int(in_char) == -1 or int(in_char) == 42){continue;}
+    str_ii += in_char;
+    if(in_char == '\n'){
+      if(str_ii == String('\r') + String('\n')){
+        if(ii_0 == 0){
+            ii_0 = 1;
+            continue;
+          }
+         break;
+      }
+      Serial.print(str_ii);
+      str_ii = "";
+     }
+   } 
+}
+  
+  
+  
