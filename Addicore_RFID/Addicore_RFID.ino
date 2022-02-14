@@ -10,6 +10,7 @@
 
 uchar fifobytes;
 uchar fifoValue;
+char inputByte;
 
 AddicoreRFID myRFID; // create AddicoreRFID object to control the RFID module
 
@@ -33,6 +34,8 @@ void setup() {
     digitalWrite(chipSelectPin, LOW);         // Activate the RFID reader
   pinMode(NRSTPD,OUTPUT);                     // Set digital pin 10 , Not Reset and Power-down
     digitalWrite(NRSTPD, HIGH);
+
+   pinMode(13, OUTPUT);
 
   myRFID.AddicoreRFID_Init();  
 }
@@ -111,6 +114,18 @@ void loop()
             delay(1000);
   }
     
-        myRFID.AddicoreRFID_Halt();      //Command tag into hibernation              
+        myRFID.AddicoreRFID_Halt();      //Command tag into hibernation 
+
+
+     while(Serial.available()>0){
+       inputByte = Serial.read();
+       Serial.println(inputByte);
+       if(inputByte == 'Z'){
+          digitalWrite(13, HIGH);
+        }
+        else if (inputByte == 'z'){
+           digitalWrite(13, LOW);
+          }
+      }         
 
 }
